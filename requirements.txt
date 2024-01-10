@@ -1,0 +1,10 @@
+pandas
+kaggle
+transformers
+scikit-learn
+sentencepiece
+pyarrow
+fastparquet
+tqdm
+matplotlib
+accelerate
