@@ -1,5 +1,6 @@
 import torch
 import pandas as pd
+import matplotlib.pyplot as plt
 from transformers import (
     DebertaV2Tokenizer,
     DebertaV2ForSequenceClassification,
@@ -10,7 +11,8 @@ from transformers import (
 from torch.utils.data import Dataset, DataLoader
 from transformers import AdamW
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+from sklearn.metrics import roc_auc_score, accuracy_score, precision_recall_fscore_support
+from tqdm import tqdm
 
 VER = 1
 
@@ -22,7 +24,9 @@ def compute_metrics(pred):
         labels, preds, average="binary"
     )
     acc = accuracy_score(labels, preds)
+    auc = roc_auc_score(labels, preds)
     return {
+        "auc": auc,
         "accuracy": acc,
         "f1": f1,
         "precision": precision,
@@ -30,9 +34,12 @@ def compute_metrics(pred):
     }
 
 
-tokenizer = DebertaV2Tokenizer.from_pretrained("microsoft/deberta-v3-base")
+tokenizer = DebertaV2Tokenizer.from_pretrained(
+    "microsoft/deberta-v3-base"
+)
 model = DebertaV2ForSequenceClassification.from_pretrained(
-    "microsoft/deberta-v3-base")
+    "microsoft/deberta-v3-base"
+)
 
 df = pd.read_parquet("../large dataset/data.parquet")
 print("The shape of train data is:", df.shape)
@@ -47,12 +54,17 @@ def get_label(source):
 
 df["label"] = df["source"].apply(get_label)
 print(df.head())
+df["label"].value_counts().plot(
+    kind="bar", title="Distribution of Labels"
+)
+plt.show()
 
 
 class CustomDataset(Dataset):
     def __init__(self, texts, labels, tokenizer):
+        processed_texts = [text for text in tqdm(texts, desc="Tokenizing")]
         self.encodings = tokenizer(
-            texts,
+            processed_texts,
             truncation=True,
             max_length=512,
             padding=True
@@ -73,8 +85,16 @@ class CustomDataset(Dataset):
 train_texts, val_texts, train_labels, val_labels = train_test_split(
     df["text"], df["label"], test_size=0.15
 )
-train_dataset = CustomDataset(train_texts, train_labels, tokenizer)
-val_dataset = CustomDataset(val_texts, val_labels, tokenizer)
+train_dataset = CustomDataset(
+    train_texts.tolist(),
+    train_labels.tolist(),
+    tokenizer
+)
+val_dataset = CustomDataset(
+    val_texts.tolist(),
+    val_labels.tolist(),
+    tokenizer
+)
 
 training_args = TrainingArguments(
     output_dir=f"../results_{VER}",
@@ -103,9 +123,8 @@ scheduler = get_polynomial_decay_schedule_with_warmup(
     optimizer,
     num_warmup_steps=0,
     num_training_steps=training_args.num_train_epochs *
-    int(len(train_dataset) * 1.0 / training_args.per_device_train_batch_size /
+    int(len(train_texts) * 1.0 / training_args.per_device_train_batch_size /
         training_args.gradient_accumulation_steps),
-    # num_training_steps=6750,
     power=1.0,
     lr_end=2.5e-6
 )
@@ -115,7 +134,8 @@ trainer = Trainer(
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=val_dataset,
-    compute_metrics=compute_metrics
+    compute_metrics=compute_metrics,
+    optimizers=(optimizer, scheduler)
 )
 
 trainer.train()
