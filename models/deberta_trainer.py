@@ -1,5 +1,6 @@
 import torch
 import pandas as pd
+import json
 import matplotlib.pyplot as plt
 from transformers import (
     DebertaV2Tokenizer,
@@ -61,14 +62,8 @@ plt.show()
 
 
 class CustomDataset(Dataset):
-    def __init__(self, texts, labels, tokenizer):
-        processed_texts = [text for text in tqdm(texts, desc="Tokenizing")]
-        self.encodings = tokenizer(
-            processed_texts,
-            truncation=True,
-            max_length=512,
-            padding=True
-        )
+    def __init__(self, encodings, labels, tokenizer):
+        self.encodings = encodings
         self.labels = labels
 
     def __getitem__(self, idx):
@@ -83,15 +78,51 @@ class CustomDataset(Dataset):
 
 
 train_texts, val_texts, train_labels, val_labels = train_test_split(
-    df["text"], df["label"], test_size=0.15
+    df["text"], df["label"],
+    test_size=0.15, random_state=2024
 )
+
+train_texts = train_texts.tolist()
+tokenized_train_texts = []
+for train_text in tqdm(train_texts, desc="Tokenizing Train Texts"):
+    tokenized_train_text = tokenizer(
+        train_text,
+        padding="max_length",
+        max_length=512,
+        truncation=True
+    )
+    tokenized_train_texts.append(tokenized_train_text)
+
+with open("../tokenized_data/train_tokenized_data.json", "w") as file:
+    json.dump(tokenized_train_texts, file)
+
+with open("../tokenized_data/train_tokenized_data.json", "r") as file:
+    tokenized_train_texts = json.load(file)
+
+val_texts = val_texts.tolist()
+tokenized_val_texts = []
+for val_text in tqdm(val_texts, desc="Tokenizing Val Texts"):
+    tokenized_val_text = tokenizer(
+        val_text,
+        padding="max_length",
+        max_length=512,
+        truncation=True
+    )
+    tokenized_val_texts.append(tokenized_val_text)
+
+with open("../tokenized_data/val_tokenized_data.json", "w") as file:
+    json.dump(tokenized_val_texts, file)
+
+with open("../tokenized_data/val_tokenized_data.json", "r") as file:
+    tokenized_val_texts = json.load(file)
+
 train_dataset = CustomDataset(
-    train_texts.tolist(),
+    tokenized_train_texts,
     train_labels.tolist(),
     tokenizer
 )
 val_dataset = CustomDataset(
-    val_texts.tolist(),
+    tokenized_val_texts,
     val_labels.tolist(),
     tokenizer
 )
