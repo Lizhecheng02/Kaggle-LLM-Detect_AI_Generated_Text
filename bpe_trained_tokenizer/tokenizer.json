@@ -1,0 +1,132 @@
+{
+  "version": "1.0",
+  "truncation": null,
+  "padding": null,
+  "added_tokens": [
+    {
+      "id": 0,
+      "content": "[UNK]",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 1,
+      "content": "[PAD]",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 2,
+      "content": "[CLS]",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 3,
+      "content": "[SEP]",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 4,
+      "content": "[MASK]",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    }
+  ],
+  "normalizer": {
+    "type": "Sequence",
+    "normalizers": []
+  },
+  "pre_tokenizer": {
+    "type": "ByteLevel",
+    "add_prefix_space": true,
+    "trim_offsets": true,
+    "use_regex": true
+  },
+  "post_processor": null,
+  "decoder": null,
+  "model": {
+    "type": "BPE",
+    "dropout": null,
+    "unk_token": "[UNK]",
+    "continuing_subword_prefix": null,
+    "end_of_word_suffix": null,
+    "fuse_unk": false,
+    "byte_fallback": false,
+    "vocab": {
+      "[UNK]": 0,
+      "[PAD]": 1,
+      "[CLS]": 2,
+      "[SEP]": 3,
+      "[MASK]": 4,
+      ".": 5,
+      "A": 6,
+      "B": 7,
+      "C": 8,
+      "a": 9,
+      "b": 10,
+      "c": 11,
+      "d": 12,
+      "e": 13,
+      "Ġ": 14,
+      "cc": 15,
+      "dd": 16,
+      "bb": 17,
+      "CC": 18,
+      "ee": 19,
+      "Ġcc": 20,
+      "Ġdd": 21,
+      "Ġccc": 22,
+      "Ġddd": 23,
+      "Aa": 24,
+      "Bbb": 25,
+      "Ġbb": 26,
+      "ĠCC": 27,
+      "Ġee": 28,
+      "ĠAa": 29,
+      "ĠBbb": 30,
+      "Ġbbb": 31,
+      "ĠCCC": 32,
+      "Ġeee": 33,
+      "ĠAaa": 34
+    },
+    "merges": [
+      "c c",
+      "d d",
+      "b b",
+      "C C",
+      "e e",
+      "Ġ cc",
+      "Ġ dd",
+      "Ġcc c",
+      "Ġdd d",
+      "A a",
+      "B bb",
+      "Ġ bb",
+      "Ġ CC",
+      "Ġ ee",
+      "Ġ Aa",
+      "Ġ Bbb",
+      "Ġbb b",
+      "ĠCC C",
+      "Ġee e",
+      "ĠAa a"
+    ]
+  }
+}
