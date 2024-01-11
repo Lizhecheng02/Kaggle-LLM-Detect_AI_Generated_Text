@@ -51,15 +51,14 @@ else:
     train.reset_index(drop=True, inplace=True)
     print(train.head())
 
-# 训练tokenizer
-raw_tokenizer = Tokenizer(models.BPE(unk_token="[UNK]"))
+raw_tokenizer = Tokenizer(models.WordPiece(unk_token="[UNK]"))
 raw_tokenizer.normalizer = normalizers.Sequence(
     [normalizers.NFC()] + [normalizers.Lowercase()] if CFG.LOWER_CASE else []
 )
 raw_tokenizer.pre_tokenizer = pre_tokenizers.ByteLevel()
 
 special_tokens = ["[UNK]", "[PAD]", "[CLS]", "[SEP]", "[MASK]"]
-trainer = trainers.BpeTrainer(
+trainer = trainers.WordPieceTrainer(
     vocab_size=CFG.VOCAB_SIZE,
     special_tokens=special_tokens
 )
@@ -73,6 +72,7 @@ def train_corpus():
 
 
 raw_tokenizer.train_from_iterator(train_corpus(), trainer=trainer)
+
 tokenizer = PreTrainedTokenizerFast(
     tokenizer_object=raw_tokenizer,
     unk_token="[UNK]",
@@ -81,9 +81,9 @@ tokenizer = PreTrainedTokenizerFast(
     sep_token="[SEP]",
     mask_token="[MASK]",
 )
-save_directory = "./bpe_trained_tokenizer"
+
+save_directory = "./wordpiece_trained_tokenizer"
 tokenizer.save_pretrained(save_directory)
-# loaded_tokenizer = PreTrainedTokenizerFast.from_pretrained(save_directory)
 
 tokenized_texts_test = []
 for text in tqdm(test["text"].tolist()):
@@ -130,9 +130,9 @@ y_train = train["label"].values
 X_test = vectorizer.transform(tokenized_texts_test)
 
 # 保存
-save_npz("processed_data/bpe/X_train.npz", X_train)
-save_npz("processed_data/bpe/X_test.npz", X_test)
-np.save("processed_data/bpe/y_train.npy", y_train)
+save_npz("processed_data/wordpiece/X_train.npz", X_train)
+save_npz("processed_data/wordpiece/X_test.npz", X_test)
+np.save("processed_data/wordpiece/y_train.npy", y_train)
 
 del vectorizer
 gc.collect()
