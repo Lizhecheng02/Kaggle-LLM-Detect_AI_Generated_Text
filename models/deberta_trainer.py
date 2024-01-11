@@ -48,7 +48,7 @@ model = DebertaV2ForSequenceClassification.from_pretrained(
 )
 
 df = pd.read_parquet("../large_dataset/data.parquet")
-df = df.sample(20000)
+# df = df.sample(20000)
 print("The shape of train data is:", df.shape)
 
 
