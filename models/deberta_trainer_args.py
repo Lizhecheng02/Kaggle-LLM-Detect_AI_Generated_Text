@@ -201,8 +201,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--version", default=1, type=int)
     parser.add_argument("--is_load_from_disk", default=False, type=bool)
-    parser.add_argument(
-        "--model_name", default="microsoft/deberta-v3-large", type=str)
+    parser.add_argument("--model_name", default="microsoft/deberta-v3-large", type=str)
     parser.add_argument("--num_samples", default=1000000, type=int)
     parser.add_argument("--test_size", default=0.10, type=float)
     parser.add_argument("--random_state", default=2024, type=int)
