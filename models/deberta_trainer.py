@@ -115,7 +115,7 @@ if not CFG.is_load_from_disk:
         tokenized_val_text = tokenizer(
             val_text,
             padding="max_length",
-            max_length=512,
+            max_length=1024,
             truncation=True
         )
         serialized_data = {key: value for key,
