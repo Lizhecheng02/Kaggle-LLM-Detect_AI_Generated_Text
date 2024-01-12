@@ -45,6 +45,7 @@ def train(args):
     )
 
     df = pd.read_parquet(args.file_path)
+    df = df.dropna()
     num_samples = min(len(df), args.num_samples)
     df = df.sample(num_samples)
     print("The shape of train data is:", df.shape)
@@ -87,15 +88,18 @@ def train(args):
         train_texts = train_texts.tolist()
         tokenized_train_texts = []
         for train_text in tqdm(train_texts, desc="Tokenizing Train Texts"):
-            tokenized_train_text = tokenizer(
-                train_text,
-                padding="max_length",
-                max_length=args.max_length,
-                truncation=True
-            )
-            serialized_data = {key: value for key,
-                               value in tokenized_train_text.items()}
-            tokenized_train_texts.append(serialized_data)
+            try:
+                tokenized_train_text = tokenizer(
+                    text=train_text,
+                    padding="max_length",
+                    max_length=args.max_length,
+                    truncation=True
+                )
+                serialized_data = {key: value for key,
+                                   value in tokenized_train_text.items()}
+                tokenized_train_texts.append(serialized_data)
+            except:
+                print("Error")
 
         with open("../tokenized_data/train_tokenized_data.json", "w") as file:
             json.dump(tokenized_train_texts, file)
@@ -107,15 +111,18 @@ def train(args):
         val_texts = val_texts.tolist()
         tokenized_val_texts = []
         for val_text in tqdm(val_texts, desc="Tokenizing Val Texts"):
-            tokenized_val_text = tokenizer(
-                val_text,
-                padding="max_length",
-                max_length=args.max_length,
-                truncation=True
-            )
-            serialized_data = {key: value for key,
-                               value in tokenized_val_text.items()}
-            tokenized_val_texts.append(serialized_data)
+            try:
+                tokenized_val_text = tokenizer(
+                    val_text,
+                    padding="max_length",
+                    max_length=args.max_length,
+                    truncation=True
+                )
+                serialized_data = {key: value for key,
+                                   value in tokenized_val_text.items()}
+                tokenized_val_texts.append(serialized_data)
+            except:
+                print("Error")
 
         with open("../tokenized_data/val_tokenized_data.json", "w") as file:
             json.dump(tokenized_val_texts, file)
@@ -202,8 +209,10 @@ if __name__ == "__main__":
     )
     parser.add_argument("--version", default=1, type=int)
     parser.add_argument("--is_load_from_disk", default=False, type=bool)
-    parser.add_argument("--model_name", default="microsoft/deberta-v3-large", type=str)
-    parser.add_argument("--file_path", default="../large_dataset/110w_dataset.parquet", type=str)
+    parser.add_argument(
+        "--model_name", default="microsoft/deberta-v3-large", type=str)
+    parser.add_argument(
+        "--file_path", default="../large_dataset/110w_dataset.parquet", type=str)
     parser.add_argument("--num_samples", default=1000000, type=int)
     parser.add_argument("--test_size", default=0.10, type=float)
     parser.add_argument("--random_state", default=2024, type=int)
@@ -226,4 +235,5 @@ if __name__ == "__main__":
     parser.add_argument("--power", default=1.0, type=float)
     parser.add_argument("--lr_end", default=2e-6, type=float)
     args = parser.parse_args()
+    print(args)
     train(args)
