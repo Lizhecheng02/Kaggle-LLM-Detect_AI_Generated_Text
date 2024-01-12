@@ -193,19 +193,21 @@ def train(args):
         config=config
     )
 
-    df = pd.read_parquet("../large_dataset/data.parquet")
+    df = pd.read_parquet(args.file_path)
+    df = df.dropna()
     num_samples = min(len(df), args.num_samples)
     df = df.sample(num_samples)
     print("The shape of train data is:", df.shape)
 
-    def get_label(source):
-        if source == "Human":
-            return 0
-        else:
-            return 1
+    # def get_label(source):
+    #     if source == "Human":
+    #         return 0
+    #     else:
+    #         return 1
 
-    df["label"] = df["source"].apply(get_label)
+    # df["label"] = df["source"].apply(get_label)
     print(df.head())
+    print(df["label"].value_counts())
     df["label"].value_counts().plot(
         kind="bar", title="Distribution of Labels"
     )
@@ -355,6 +357,8 @@ if __name__ == "__main__":
     parser.add_argument("--is_load_from_disk", default=False, type=bool)
     parser.add_argument(
         "--model_name", default="microsoft/deberta-v3-large", type=str)
+    parser.add_argument(
+        "--file_path", default="../large_dataset/110w_dataset.parquet", type=str)
     parser.add_argument("--num_samples", default=1000000, type=int)
     parser.add_argument("--test_size", default=0.10, type=float)
     parser.add_argument("--random_state", default=2024, type=int)
