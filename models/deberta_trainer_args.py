@@ -65,8 +65,13 @@ def train(args):
     plt.show()
 
     class CustomDataset(Dataset):
-        def __init__(self, encodings, labels, tokenizer):
-            self.encodings = encodings
+        def __init__(self, texts, labels, tokenizer):
+            self.encodings = tokenizer(
+                text=texts,
+                padding="max_length",
+                max_length=args.max_length,
+                truncation=True
+            )
             self.labels = labels
 
         def __getitem__(self, idx):
@@ -84,75 +89,75 @@ def train(args):
         test_size=args.test_size, random_state=args.random_state
     )
 
-    if not args.is_load_from_disk:
-        train_texts = train_texts.tolist()
-        tokenized_train_texts = []
-        for train_text in tqdm(train_texts, desc="Tokenizing Train Texts"):
-            try:
-                tokenized_train_text = tokenizer(
-                    text=train_text,
-                    padding="max_length",
-                    max_length=args.max_length,
-                    truncation=True
-                )
-                serialized_data = {key: value for key,
-                                   value in tokenized_train_text.items()}
-                tokenized_train_texts.append(serialized_data)
-            except:
-                print("Error")
+    # if not args.is_load_from_disk:
+    #     train_texts = train_texts.tolist()
+    #     tokenized_train_texts = []
+    #     for train_text in tqdm(train_texts, desc="Tokenizing Train Texts"):
+    #         try:
+    #             tokenized_train_text = tokenizer(
+    #                 text=train_text,
+    #                 padding="max_length",
+    #                 max_length=args.max_length,
+    #                 truncation=True
+    #             )
+    #             serialized_data = {key: value for key,
+    #                                value in tokenized_train_text.items()}
+    #             tokenized_train_texts.append(serialized_data)
+    #         except:
+    #             print("Error")
 
-        with open("../tokenized_data/train_tokenized_data.json", "w") as file:
-            json.dump(tokenized_train_texts, file)
-    else:
-        with open("../tokenized_data/train_tokenized_data.json", "r") as file:
-            tokenized_train_texts = json.load(file)
+    #     with open("../tokenized_data/train_tokenized_data.json", "w") as file:
+    #         json.dump(tokenized_train_texts, file)
+    # else:
+    #     with open("../tokenized_data/train_tokenized_data.json", "r") as file:
+    #         tokenized_train_texts = json.load(file)
 
-    if not args.is_load_from_disk:
-        val_texts = val_texts.tolist()
-        tokenized_val_texts = []
-        for val_text in tqdm(val_texts, desc="Tokenizing Val Texts"):
-            try:
-                tokenized_val_text = tokenizer(
-                    val_text,
-                    padding="max_length",
-                    max_length=args.max_length,
-                    truncation=True
-                )
-                serialized_data = {key: value for key,
-                                   value in tokenized_val_text.items()}
-                tokenized_val_texts.append(serialized_data)
-            except:
-                print("Error")
+    # if not args.is_load_from_disk:
+    #     val_texts = val_texts.tolist()
+    #     tokenized_val_texts = []
+    #     for val_text in tqdm(val_texts, desc="Tokenizing Val Texts"):
+    #         try:
+    #             tokenized_val_text = tokenizer(
+    #                 val_text,
+    #                 padding="max_length",
+    #                 max_length=args.max_length,
+    #                 truncation=True
+    #             )
+    #             serialized_data = {key: value for key,
+    #                                value in tokenized_val_text.items()}
+    #             tokenized_val_texts.append(serialized_data)
+    #         except:
+    #             print("Error")
 
-        with open("../tokenized_data/val_tokenized_data.json", "w") as file:
-            json.dump(tokenized_val_texts, file)
-    else:
-        with open("../tokenized_data/val_tokenized_data.json", "r") as file:
-            tokenized_val_texts = json.load(file)
+    #     with open("../tokenized_data/val_tokenized_data.json", "w") as file:
+    #         json.dump(tokenized_val_texts, file)
+    # else:
+    #     with open("../tokenized_data/val_tokenized_data.json", "r") as file:
+    #         tokenized_val_texts = json.load(file)
 
-    train_encodings = {key: [] for key in tokenized_train_texts[0].keys()}
-    for entry in tokenized_train_texts:
-        for key in train_encodings.keys():
-            train_encodings[key].append(entry[key])
+    # train_encodings = {key: [] for key in tokenized_train_texts[0].keys()}
+    # for entry in tokenized_train_texts:
+    #     for key in train_encodings.keys():
+    #         train_encodings[key].append(entry[key])
 
-    for key in train_encodings.keys():
-        train_encodings[key] = torch.tensor(train_encodings[key])
+    # for key in train_encodings.keys():
+    #     train_encodings[key] = torch.tensor(train_encodings[key])
 
-    val_encodings = {key: [] for key in tokenized_val_texts[0].keys()}
-    for entry in tokenized_val_texts:
-        for key in val_encodings.keys():
-            val_encodings[key].append(entry[key])
+    # val_encodings = {key: [] for key in tokenized_val_texts[0].keys()}
+    # for entry in tokenized_val_texts:
+    #     for key in val_encodings.keys():
+    #         val_encodings[key].append(entry[key])
 
-    for key in val_encodings.keys():
-        val_encodings[key] = torch.tensor(val_encodings[key])
+    # for key in val_encodings.keys():
+    #     val_encodings[key] = torch.tensor(val_encodings[key])
 
     train_dataset = CustomDataset(
-        train_encodings,
+        train_texts.tolist(),
         train_labels.tolist(),
         tokenizer
     )
     val_dataset = CustomDataset(
-        val_encodings,
+        val_texts.tolist(),
         val_labels.tolist(),
         tokenizer
     )
@@ -208,7 +213,7 @@ if __name__ == "__main__":
         description="Finetune a Transformers Model on a Text Classification Task"
     )
     parser.add_argument("--version", default=1, type=int)
-    parser.add_argument("--is_load_from_disk", default=False, type=bool)
+    # parser.add_argument("--is_load_from_disk", default=False, type=bool)
     parser.add_argument(
         "--model_name", default="microsoft/deberta-v3-large", type=str)
     parser.add_argument(
