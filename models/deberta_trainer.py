@@ -47,20 +47,21 @@ model = DebertaV2ForSequenceClassification.from_pretrained(
     "microsoft/deberta-v3-base"
 )
 
-df = pd.read_parquet("../large_dataset/data.parquet")
+df = pd.read_parquet("../large_dataset/110w_dataset.parquet")
 # df = df.sample(20000)
 print("The shape of train data is:", df.shape)
 
 
-def get_label(source):
-    if source == "Human":
-        return 0
-    else:
-        return 1
+# def get_label(source):
+#     if source == "Human":
+#         return 0
+#     else:
+#         return 1
 
 
-df["label"] = df["source"].apply(get_label)
+# df["label"] = df["source"].apply(get_label)
 print(df.head())
+print(df["label"].value_counts())
 df["label"].value_counts().plot(
     kind="bar", title="Distribution of Labels"
 )
