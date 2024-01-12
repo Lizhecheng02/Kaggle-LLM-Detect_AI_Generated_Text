@@ -151,11 +151,14 @@ def train(args):
     # for key in val_encodings.keys():
     #     val_encodings[key] = torch.tensor(val_encodings[key])
 
+    print("... Constructing Training Dataset ...")
     train_dataset = CustomDataset(
         train_texts.tolist(),
         train_labels.tolist(),
         tokenizer
     )
+
+    print("... Constructing Validation Dataset ...")
     val_dataset = CustomDataset(
         val_texts.tolist(),
         val_labels.tolist(),
