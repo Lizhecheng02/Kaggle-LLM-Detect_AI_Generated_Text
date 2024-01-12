@@ -26,8 +26,8 @@ export KAGGLE_KEY="your_api_key"
 ```bash
 cd large_dataset
 sudo apt install unzip
-kaggle datasets download -d starblasters8/human-vs-llm-text-corpus
-unzip human-vs-llm-text-corpus.zip
+kaggle datasets download -d lizhecheng/llm-detect-ai-generated-text-dataset
+unzip llm-detect-ai-generated-text-dataset.zip
 cd ..
 ```
 
