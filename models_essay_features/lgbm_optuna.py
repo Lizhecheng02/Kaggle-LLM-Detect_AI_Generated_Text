@@ -14,7 +14,7 @@ warnings.filterwarnings("ignore")
 load_from_disk = False
 
 print("... Loading Dataset ...")
-df = pd.read_csv("../train_v3_drcat_02.csv")
+df = pd.read_csv("../train_v3_drcat_02.csv", sep=",")
 df = df[["text", "label", "prompt_name"]]
 df["id"] = np.arange(len(df))
 df = df.sample(1000)
