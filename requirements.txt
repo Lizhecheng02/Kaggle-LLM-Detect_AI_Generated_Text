@@ -8,3 +8,7 @@ fastparquet
 tqdm
 matplotlib
 accelerate
+lightgbm
+xgboost
+catboost
+datasets
