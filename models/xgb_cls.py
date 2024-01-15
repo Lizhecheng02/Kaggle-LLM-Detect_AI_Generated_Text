@@ -183,3 +183,13 @@ model.fit(X_train, y_train)
 y_val_pred = model.predict_proba(X_val)[:, 1]
 final_val_score = roc_auc_score(y_val, y_val_pred)
 print(f"Final Validation AUC: {final_val_score}")
+
+feature_importances = model.get_booster().get_score(importance_type="weight")
+feature_names = list(feature_importances.keys())
+feature_scores = list(feature_importances.values())
+features = pd.DataFrame({
+    "Feature": feature_names,
+    "Importance": feature_scores
+})
+top_features = features.sort_values(by="Importance", ascending=False).head(50)
+print(top_features)

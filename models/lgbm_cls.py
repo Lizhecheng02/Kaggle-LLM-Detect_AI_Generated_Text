@@ -193,3 +193,12 @@ model.fit(X_train, y_train)
 y_val_pred = model.predict_proba(X_val)[:, -1]
 final_val_score = roc_auc_score(y_val, y_val_pred)
 print(f"Final Validation Accuracy: {final_val_score}")
+
+feature_importances = model.feature_importances_
+feature_names = X_train.columns
+features = pd.DataFrame({
+    "Feature": feature_names,
+    "Importance": feature_importances
+})
+top_features = features.sort_values(by="Importance", ascending=False).head(50)
+print(top_features)
