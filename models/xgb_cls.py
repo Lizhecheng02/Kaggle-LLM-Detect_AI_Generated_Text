@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.metrics import roc_auc_score
 import numpy as np
 import lightgbm as lgb
+import xgboost as xgb
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from tokenizers import (
@@ -137,18 +138,12 @@ skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
 params = {
     "n_estimators": 2000,
-    "verbose": 1,
-    "objective": "cross_entropy",
-    "metric": "auc",
+    "verbosity": 1,
+    "objective": "binary:logistic",
+    "eval_metric": "auc",
     "learning_rate": 0.005,
     "colsample_bytree": 0.4,
-    "random_state": 42,
-    # "colsample_bynode": 0.8,
-    # "lambda_l1": 4.562963348932286,
-    # "lambda_l2": 2.97485,
-    # "min_data_in_leaf": 115,
-    # "max_depth": 23,
-    # "max_bin": 898
+    "random_state": 42
 }
 
 val_fold_scores = []
@@ -158,23 +153,18 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
     X_train_fold, y_train_fold = X_train[train_idx], y_train[train_idx]
     X_val_fold, y_val_fold = X_train[val_idx], y_train[val_idx]
 
-    model = lgb.LGBMClassifier(**params)
-    early_stopping_callback = lgb.early_stopping(
-        50, first_metric_only=True, verbose=True
-    )
+    model = xgb.XGBClassifier(**params)
+
     model.fit(
-        X=X_train_fold,
-        y=y_train_fold,
+        X_train_fold,
+        y_train_fold,
         eval_set=[(X_val_fold, y_val_fold)],
-        callbacks=[early_stopping_callback]
+        early_stopping_rounds=50,
+        verbose=True
     )
 
-    y_val_fold_pred = model.predict_proba(
-        X_val_fold, num_iteration=model.best_iteration_
-    )[:, 1]
-    y_val_pred = model.predict_proba(
-        X_val_fold, num_iteration=model.best_iteration_
-    )[:, 1]
+    y_val_fold_pred = model.predict_proba(X_val_fold)[:, 1]
+    y_val_pred = model.predict_proba(X_val)[:, 1]
 
     val_fold_score = roc_auc_score(y_val_fold, y_val_fold_pred)
     val_score = roc_auc_score(y_val, y_val_pred)
@@ -188,8 +178,8 @@ average_val_score = np.mean(val_scores)
 print(
     f"Average Fold Validation AUC: {average_val_fold_score}, Average Validation AUC: {average_val_score}")
 
-model = lgb.LGBMClassifier(**params)
+model = xgb.XGBClassifier(**params)
 model.fit(X_train, y_train)
-y_val_pred = model.predict_proba(X_val)[:, -1]
+y_val_pred = model.predict_proba(X_val)[:, 1]
 final_val_score = roc_auc_score(y_val, y_val_pred)
-print(f"Final Validation Accuracy: {final_val_score}")
+print(f"Final Validation AUC: {final_val_score}")
