@@ -1,13 +1,15 @@
 import sys
 sys.path.append("..")
-import lightgbm as lgb
-from sklearn.model_selection import StratifiedKFold, train_test_split
-from sklearn.metrics import roc_auc_score
-from essay_features_extractor import EssayProcessor
-import numpy as np
-import pandas as pd
 import warnings
+import pandas as pd
+import numpy as np
+from essay_features_extractor import EssayProcessor
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import StratifiedKFold, train_test_split
+import lightgbm as lgb
 warnings.filterwarnings("ignore")
+
+load_from_disk = False
 
 print("... Loading Dataset ...")
 df = pd.read_csv("../train_v3_drcat_02.csv")
@@ -16,22 +18,30 @@ df["id"] = np.arange(len(df))
 df = df.sample(1000)
 print(df.head())
 
-print("... Constructing Features ...")
-essay_processor = EssayProcessor()
-train_sent_agg_df = essay_processor.sentence_processor(df=df)
-train_paragraph_agg_df = essay_processor.paragraph_processor(df=df)
-train_word_agg_df = essay_processor.word_processor(df=df)
+if not load_from_disk:
+    print("... Constructing Features ...")
+    essay_processor = EssayProcessor()
+    train_sent_agg_df = essay_processor.sentence_processor(df=df)
+    train_paragraph_agg_df = essay_processor.paragraph_processor(df=df)
+    train_word_agg_df = essay_processor.word_processor(df=df)
 
-df_feats = train_sent_agg_df.merge(
-    train_paragraph_agg_df, on="id", how="left"
-)
-df_feats = df_feats.merge(
-    train_word_agg_df, on="id", how="left"
-)
-df_feats = df_feats.merge(df, on="id", how="left")
-# df_feats = df_feats.fillna(0.0)
-df_feats.reset_index(drop=True, inplace=True)
-print("The shape after constructing features:", df_feats.shape)
+    df_feats = train_sent_agg_df.merge(
+        train_paragraph_agg_df, on="id", how="left"
+    )
+    df_feats = df_feats.merge(
+        train_word_agg_df, on="id", how="left"
+    )
+    df_feats = df_feats.merge(df, on="id", how="left")
+    # df_feats = df_feats.fillna(0.0)
+    df_feats.reset_index(drop=True, inplace=True)
+    print("The shape after constructing features:", df_feats.shape)
+
+    print("... Saving Dataset ...")
+    df_feats.to_csv("feats.csv", index=False)
+
+else:
+    print("... Loading Features From Disk ...")
+    df_feats = pd.read_csv("feats.csv")
 
 target_col = ["label"]
 drop_cols = ["id", "prompt_name", "text", "sent", "paragraph", "word"]
@@ -48,11 +58,11 @@ n_splits = 10
 skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
 params = {
-    "n_estimators": 2000,
+    "n_estimators": 10000,
     "verbose": 1,
     "objective": "cross_entropy",
     "metric": "auc",
-    "learning_rate": 0.001,
+    "learning_rate": 0.005,
     "colsample_bytree": 0.8,
     "random_state": 42,
     # "colsample_bynode": 0.8,
