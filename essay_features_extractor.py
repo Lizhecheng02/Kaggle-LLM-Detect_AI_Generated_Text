@@ -77,7 +77,7 @@ class EssayProcessor:
         sent_agg_df['id'] = sent_agg_df.index
         for sent_l in [20, 40, 60, 80]:
             sent_agg_df[f'sent_len_ge_{sent_l}_count'] = \
-                sent_agg_df[sent_agg_df['sent_len'] >= sent_l].groupby(
+                df[df['sent_len'] >= sent_l].groupby(
                 ['id']).count().iloc[:, 0]
             sent_agg_df[f'sent_len_ge_{sent_l}_count'] = \
                 sent_agg_df[f'sent_len_ge_{sent_l}_count'].fillna(0)
@@ -134,23 +134,3 @@ class EssayProcessor:
         paragraph_agg_df = self.compute_paragraph_aggregations(paragraph_df)
         print("The shape of paragraph agg:", paragraph_agg_df.shape)
         return paragraph_agg_df
-
-
-essay_processor = EssayProcessor()
-df = pd.read_csv("train_v3_drcat_02.csv")
-df = df[["text", "label", "prompt_name"]]
-df["id"] = np.arange(len(df))
-print(df.head())
-
-train_sent_agg_df = essay_processor.sentence_processor(df=df)
-train_paragraph_agg_df = essay_processor.paragraph_processor(df=df)
-train_word_agg_df = essay_processor.word_processor(df=df)
-
-train_feats = train_sent_agg_df.merge(
-    train_paragraph_agg_df, on="id", how="left"
-)
-train_feats = train_feats.merge(
-    train_word_agg_df, on="id", how="left"
-)
-print(train_feats.shape)
-print(train_feats.head(5))
