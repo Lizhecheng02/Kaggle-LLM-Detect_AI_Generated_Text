@@ -6,6 +6,8 @@ from sklearn.metrics import roc_auc_score
 from essay_features_extractor import EssayProcessor
 import numpy as np
 import pandas as pd
+import warnings
+warnings.filterwarnings("ignore")
 
 print("... Loading Dataset ...")
 df = pd.read_csv("../train_v3_drcat_02.csv")
@@ -29,7 +31,6 @@ df_feats = df_feats.merge(
 df_feats = df_feats.merge(df, on="id", how="left")
 # df_feats = df_feats.fillna(0.0)
 df_feats.reset_index(drop=True, inplace=True)
-print(type(df_feats))
 print("The shape after constructing features:", df_feats.shape)
 
 target_col = ["label"]
@@ -37,12 +38,9 @@ drop_cols = ["id", "prompt_name", "text", "sent", "paragraph", "word"]
 train_cols = [
     col for col in df_feats.columns if col not in target_col + drop_cols
 ]
-print(train_cols)
 
 X_train = df_feats[train_cols]
 y_train = df_feats[target_col]
-print(type(X_train))
-print(type(y_train))
 
 print("... Training ...")
 
@@ -55,7 +53,7 @@ params = {
     "objective": "cross_entropy",
     "metric": "auc",
     "learning_rate": 0.001,
-    "colsample_bytree": 0.4,
+    "colsample_bytree": 0.8,
     "random_state": 42,
     # "colsample_bynode": 0.8,
     # "lambda_l1": 4.562963348932286,
