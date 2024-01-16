@@ -173,7 +173,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
         X_val_fold, num_iteration=model.best_iteration_
     )[:, 1]
     y_val_pred = model.predict_proba(
-        X_val_fold, num_iteration=model.best_iteration_
+        X_val, num_iteration=model.best_iteration_
     )[:, 1]
 
     val_fold_score = roc_auc_score(y_val_fold, y_val_fold_pred)
