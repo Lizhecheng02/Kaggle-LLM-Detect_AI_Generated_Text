@@ -47,6 +47,11 @@ kaggle competitions download -c llm-detect-ai-generated-text
 unzip llm-detect-ai-generated-text.zip
 ```
 
+```bash
+kaggle competitions download -d lizhecheng/daigt-datasets
+unzip daigt-datasets.zip
+```
+
 
 ### Generate New Datasets
 
