@@ -12,3 +12,4 @@ lightgbm
 xgboost
 catboost
 datasets
+optuna
