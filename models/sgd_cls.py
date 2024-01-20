@@ -141,7 +141,7 @@ skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 params = {
     "loss": "modified_huber",
     "learning_rate": "optimal",
-    "max_iter": 2000,
+    "max_iter": 10000,
     "verbose": 1,
     "random_state": 42,
 }
