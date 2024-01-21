@@ -26,12 +26,12 @@ from transformers import PreTrainedTokenizerFast
 
 
 print("... Loading Dataset ...")
-train = pd.read_csv("../train_v3_drcat_02.csv", sep=",")
-excluded_prompt_name_list = [
-    "Phones and driving", "Summer projects", "Mandatory extracurricular activities", "Community service",
-    "Grades for extracurricular activities", "Cell phones at school", "Distance learning", "Seeking multiple opinions"
-]
-train = train[~(train["prompt_name"].isin(excluded_prompt_name_list))]
+train = pd.read_csv("../train_v2_drcat_02.csv", sep=",")
+# excluded_prompt_name_list = [
+#     "Phones and driving", "Summer projects", "Mandatory extracurricular activities", "Community service",
+#     "Grades for extracurricular activities", "Cell phones at school", "Distance learning", "Seeking multiple opinions"
+# ]
+# train = train[~(train["prompt_name"].isin(excluded_prompt_name_list))]
 train = train.drop_duplicates(subset=["text"])
 train.reset_index(drop=True, inplace=True)
 print("The shape of total dataset:", train.shape)
@@ -133,21 +133,22 @@ gc.collect()
 
 print("... Training ...")
 
-n_splits = 10
+n_splits = 5
 skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
 mlp_params = {
-    "hidden_layer_sizes": (100, ),
+    "hidden_layer_sizes": (8, ),
     "activation": "relu",
     "solver": "adam",
     "alpha": 0.001,
     "learning_rate": "constant",
-    "max_iter": 200,
+    "max_iter": 120,
     "random_state": 42,
-    # "early_stopping": True,
-    # "validation_fraction": 0.1,
-    # "n_iter_no_change": 10,
-    # "tol": 0.0001
+    "verbose": True,
+    "early_stopping": True,
+    "validation_fraction": 0.1,
+    "n_iter_no_change": 10,
+    "tol": 0.0001
 }
 
 
@@ -162,12 +163,8 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
     print(model)
     model.fit(X_train_fold, y_train_fold)
 
-    y_val_fold_pred = model.predict_proba(
-        X_val_fold, num_iteration=model.best_iteration_
-    )[:, 1]
-    y_val_pred = model.predict_proba(
-        X_val, num_iteration=model.best_iteration_
-    )[:, 1]
+    y_val_fold_pred = model.predict_proba(X_val_fold)[:, 1]
+    y_val_pred = model.predict_proba(X_val)[:, 1]
 
     val_fold_score = roc_auc_score(y_val_fold, y_val_fold_pred)
     val_score = roc_auc_score(y_val, y_val_pred)
@@ -186,12 +183,3 @@ model.fit(X_train, y_train)
 y_val_pred = model.predict_proba(X_val)[:, -1]
 final_val_score = roc_auc_score(y_val, y_val_pred)
 print(f"Final Validation Accuracy: {final_val_score}")
-
-feature_importances = model.feature_importances_
-feature_names = X_train.columns
-features = pd.DataFrame({
-    "Feature": feature_names,
-    "Importance": feature_importances
-})
-top_features = features.sort_values(by="Importance", ascending=False).head(50)
-print(top_features)
