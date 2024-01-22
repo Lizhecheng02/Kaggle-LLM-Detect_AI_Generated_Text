@@ -137,7 +137,7 @@ n_splits = 5
 skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
 mlp_params = {
-    "hidden_layer_sizes": (8, ),
+    "hidden_layer_sizes": (8, 8),
     "activation": "relu",
     "solver": "adam",
     "alpha": 0.001,
