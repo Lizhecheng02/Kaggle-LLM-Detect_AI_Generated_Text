@@ -152,8 +152,6 @@ As a result, although ``CatBoost`` score on the LB is relatively low compared to
 - I tried to generate new dataset by ``gpt-3.5-turbo``, but could not get a good result on my dataset.
 
   ```
-  ## Here are three prompts I used to generate dataset.
-  
   model_input = "The following is a human-written article. Now, please rewrite this article in your writing style, also optimize sentence structures and correct grammatical errors. You can appropriately add or remove content associated with the article, but should keep the general meaning unchanged. Just return the modified article.\n" + "article: " + human_text
   ```
   
